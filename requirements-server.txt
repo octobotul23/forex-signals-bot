@@ -1,0 +1,17 @@
+# Platform server (works on Linux and Windows). For PRICE_FEED=mt5 on a Windows VPS also install MetaTrader5.
+fastapi>=0.115
+uvicorn[standard]>=0.30
+SQLAlchemy>=2.0
+argon2-cffi>=23.1
+PyJWT>=2.8
+anthropic>=1.16
+pydantic>=2.7
+feedparser>=6.0
+requests>=2.31
+pandas>=2.0
+numpy>=1.26
+PyYAML>=6.0
+python-dotenv>=1.0
+websockets>=14
+# PostgreSQL instead of SQLite (optional): set DATABASE_URL=postgresql+psycopg://user:pass@host/db
+# psycopg[binary]>=3.1

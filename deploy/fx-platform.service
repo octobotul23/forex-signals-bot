@@ -1,0 +1,23 @@
+# systemd unit: keeps the platform running and restarts it after crashes or reboots.
+# Install:  sudo cp deploy/fx-platform.service /etc/systemd/system/ && sudo systemctl enable --now fx-platform
+[Unit]
+Description=FX Signals platform (web app, API, signal engine)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=fx
+WorkingDirectory=/opt/forex-bot
+EnvironmentFile=/opt/forex-bot/.env
+ExecStart=/opt/forex-bot/.venv/bin/python main.py serve --host 127.0.0.1 --port 8000
+Restart=always
+RestartSec=5
+# hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+ReadWritePaths=/opt/forex-bot/data /opt/forex-bot/logs
+
+[Install]
+WantedBy=multi-user.target

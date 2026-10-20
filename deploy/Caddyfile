@@ -1,0 +1,10 @@
+# Caddy gets and renews the HTTPS certificate automatically.
+# Replace the domain, point its DNS A record to the VPS IP, then: sudo systemctl reload caddy
+signals.example.com {
+	encode gzip
+	reverse_proxy 127.0.0.1:8000
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		-Server
+	}
+}

@@ -1,0 +1,17 @@
+MetaTrader5>=5.0.45
+pandas>=2.0
+numpy>=1.26
+PyYAML>=6.0
+python-dotenv>=1.0
+requests>=2.31
+Flask>=3.0
+# platform server + connector (see requirements-server.txt for a Linux VPS)
+fastapi>=0.115
+uvicorn[standard]>=0.30
+SQLAlchemy>=2.0
+argon2-cffi>=23.1
+PyJWT>=2.8
+anthropic>=1.16
+pydantic>=2.7
+feedparser>=6.0
+websockets>=14
