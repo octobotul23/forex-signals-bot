@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Forex Bot Desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" integrity="sha384-bs/nf9FbdNouRbMiFcrcZfLXYPKiPaGVGplVbv7dLGECccEXDW+S3zjqSKR5ZEaD" crossorigin="anonymous"></script>
+<style>
+  :root {
+    --ink: #101010; --ink-2: #161616; --paper: #F1EFE9; --muted: rgba(241,239,233,.56); --faint: rgba(241,239,233,.32);
+    --gold: #C9A96E; --gold-soft: rgba(201,169,110,.14); --indigo: #2A274E;
+    --glass: rgba(255,255,255,.035); --glass-2: rgba(255,255,255,.06); --line: rgba(241,239,233,.09);
+    --up: #8CC59A; --down: #E08A7C; --warn: #E3B860;
+    --r-card: 20px; --ease: cubic-bezier(.16,1,.3,1);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--ink); color: var(--paper); }
+  body {
+    font-family: "Inter Tight", system-ui, sans-serif; font-weight: 400; font-size: 14px; line-height: 1.5;
+    min-height: 100vh;
+    background:
+      radial-gradient(900px 500px at 85% -10%, rgba(42,39,78,.55), transparent 60%),
+      radial-gradient(700px 400px at -10% 110%, rgba(201,169,110,.08), transparent 60%), var(--ink);
+    background-attachment: fixed;
+  }
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 28px 24px 64px; }
+  header { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; }
+  .eyebrow { color: var(--gold); font-size: 11px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; }
+  h1 { margin: 6px 0 0; font-size: 34px; font-weight: 300; letter-spacing: -.02em; line-height: 1.1; }
+  h1 b { font-weight: 700; }
+  h2 { margin: 0; font-size: 15px; font-weight: 600; letter-spacing: -.01em; }
+  .row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .pill, button.pill {
+    display: inline-flex; align-items: center; gap: 8px; height: 34px; padding: 0 14px; border-radius: 999px;
+    border: 1px solid var(--line); background: var(--glass); color: var(--paper); font: inherit; font-size: 13px;
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); white-space: nowrap;
+  }
+  button.pill { cursor: pointer; transition: background .3s var(--ease), border-color .3s var(--ease), color .3s var(--ease); }
+  button.pill:hover { background: var(--glass-2); border-color: rgba(241,239,233,.18); }
+  button.pill.gold { background: var(--gold); color: var(--ink); border-color: var(--gold); font-weight: 600; }
+  button.pill.gold:hover { background: #d6b984; }
+  .seg { display: inline-flex; padding: 3px; border-radius: 999px; border: 1px solid var(--line); background: var(--glass); backdrop-filter: blur(14px); }
+  .seg button { height: 28px; padding: 0 14px; border: 0; border-radius: 999px; background: transparent; color: var(--muted); font: inherit; font-size: 13px; cursor: pointer; transition: all .3s var(--ease); }
+  .seg button.on { background: var(--paper); color: var(--ink); font-weight: 600; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--faint); }
+  .dot.on { background: var(--up); box-shadow: 0 0 0 4px rgba(140,197,154,.15); }
+  .dot.warn { background: var(--warn); box-shadow: 0 0 0 4px rgba(227,184,96,.15); }
+  .chip { display: inline-flex; align-items: center; height: 24px; padding: 0 10px; border-radius: 999px; font-size: 12px; background: var(--glass-2); color: var(--muted); border: 1px solid var(--line); }
+  .chip.gold { color: var(--gold); background: var(--gold-soft); border-color: rgba(201,169,110,.25); }
+  .chip.up { color: var(--up); } .chip.down { color: var(--down); } .chip.warn { color: var(--warn); }
+  .card {
+    background: var(--glass); border: 1px solid var(--line); border-radius: var(--r-card); padding: 20px;
+    backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+  }
+  .card-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+  .grid { display: grid; gap: 14px; }
+  .kpis { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); margin-bottom: 14px; }
+  .kpi .label { color: var(--muted); font-size: 12px; }
+  .kpi .value { font-size: 26px; font-weight: 300; letter-spacing: -.02em; margin-top: 6px; font-variant-numeric: tabular-nums; }
+  .kpi .value b { font-weight: 700; }
+  .kpi .sub { color: var(--faint); font-size: 12px; margin-top: 2px; }
+  #btKpis { grid-template-columns: repeat(6, 1fr); }
+  @media (max-width: 1100px) { #btKpis { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 560px) { #btKpis { grid-template-columns: repeat(2, 1fr); } }
+  .two { grid-template-columns: 1.6fr 1fr; }
+  @media (max-width: 900px) { .two { grid-template-columns: 1fr; } h1 { font-size: 28px; } .wrap { padding: 20px 16px 48px; } }
+  .chart-box { position: relative; height: 280px; }
+  .table-wrap { overflow-x: auto; margin: 0 -20px -20px; padding: 0 20px 12px; }
+  table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  th { text-align: left; font-weight: 500; color: var(--faint); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; padding: 8px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  td { padding: 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  tr:last-child td { border-bottom: 0; }
+  td.num, th.num { text-align: right; }
+  .up { color: var(--up); } .down { color: var(--down); } .muted { color: var(--muted); }
+  .side { font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; }
+  .events { list-style: none; margin: 0; padding: 0; max-height: 360px; overflow-y: auto; }
+  .events li { display: grid; grid-template-columns: 64px 1fr; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+  .events li:last-child { border-bottom: 0; }
+  .events time { color: var(--faint); font-size: 12px; font-variant-numeric: tabular-nums; }
+  .events .error { color: var(--down); } .events .warning { color: var(--warn); }
+  .empty { padding: 36px 20px; text-align: center; color: var(--muted); }
+  .empty code, code { font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; background: var(--glass-2); border: 1px solid var(--line); padding: 3px 8px; border-radius: 8px; color: var(--paper); }
+  .hidden { display: none !important; }
+  .stack > * + * { margin-top: 14px; }
+  .note { color: var(--faint); font-size: 12px; margin-top: 18px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow" data-i18n="eyebrow">Forex bot · MetaTrader 5</div>
+      <h1><span data-i18n="title1">Trading</span> <b data-i18n="title2">Desk</b></h1>
+    </div>
+    <div class="row">
+      <span class="pill" id="statusPill"><span class="dot" id="statusDot"></span><span id="statusText">—</span></span>
+      <div class="seg" id="tabs">
+        <button data-tab="live" class="on" data-i18n="tabLive">Live</button>
+        <button data-tab="backtest" data-i18n="tabBacktest">Backtest</button>
+      </div>
+      <div class="seg" id="lang">
+        <button data-lang="en" class="on">EN</button>
+        <button data-lang="ro">RO</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ───────────── LIVE ───────────── -->
+  <section id="tab-live" class="stack">
+    <div class="row" id="liveChips"></div>
+    <div class="grid kpis">
+      <div class="card kpi"><div class="label" data-i18n="balance">Balance</div><div class="value" id="kBalance">—</div><div class="sub" id="kCurrency"></div></div>
+      <div class="card kpi"><div class="label" data-i18n="equity">Equity</div><div class="value" id="kEquity">—</div><div class="sub" id="kFloating"></div></div>
+      <div class="card kpi"><div class="label" data-i18n="todayPnl">Today's P&amp;L</div><div class="value" id="kDay">—</div><div class="sub" id="kDaySub"></div></div>
+      <div class="card kpi"><div class="label" data-i18n="openPos">Open positions</div><div class="value" id="kOpen">—</div><div class="sub" id="kOpenSub"></div></div>
+    </div>
+    <div class="grid two">
+      <div class="card">
+        <div class="card-head"><h2 data-i18n="equityCurve">Equity curve</h2>
+          <button class="pill" id="pauseBtn"><span data-i18n="pause">Pause new trades</span></button></div>
+        <div class="chart-box"><canvas id="liveChart"></canvas></div>
+        <div class="empty hidden" id="liveChartEmpty" data-i18n-html="noEquity"></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h2 data-i18n="activity">Activity</h2></div>
+        <ul class="events" id="events"></ul>
+        <div class="empty hidden" id="eventsEmpty" data-i18n-html="notRunning"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h2 data-i18n="openPositions">Open positions</h2></div>
+      <div class="table-wrap"><table id="posTable"></table></div>
+      <div class="empty hidden" id="posEmpty" data-i18n="noPositions">No open positions.</div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h2 data-i18n="tradeHistory">Trade history</h2></div>
+      <div class="table-wrap"><table id="tradeTable"></table></div>
+      <div class="empty hidden" id="tradeEmpty" data-i18n="noTrades">No trades yet.</div>
+    </div>
+  </section>
+
+  <!-- ───────────── BACKTEST ───────────── -->
+  <section id="tab-backtest" class="stack hidden">
+    <div class="card empty hidden" id="btEmpty" data-i18n-html="noBacktest"></div>
+    <div id="btBody" class="stack hidden">
+      <div class="row" id="btChips"></div>
+      <div class="grid kpis" id="btKpis"></div>
+      <div class="grid two">
+        <div class="card">
+          <div class="card-head"><h2 data-i18n="equityCurve">Equity curve</h2><span class="chip" id="btPeriod"></span></div>
+          <div class="chart-box"><canvas id="btChart"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h2 data-i18n="bySymbol">By symbol</h2></div>
+          <div class="table-wrap"><table id="btSymTable"></table></div>
+          <div class="card-head" style="margin-top:18px"><h2 data-i18n="exitReasons">Exit reasons</h2></div>
+          <div class="row" id="btReasons"></div>
+          <div class="card-head" style="margin-top:18px"><h2 data-i18n="skipped">Skipped signals</h2></div>
+          <div class="row" id="btSkipped"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h2 data-i18n="trades">Trades</h2><span class="chip" id="btTradeCount"></span></div>
+        <div class="table-wrap"><table id="btTradeTable"></table></div>
+      </div>
+    </div>
+  </section>
+
+  <p class="note" data-i18n="disclaimer">Results from backtests and demo accounts do not guarantee future performance. Trading forex with leverage can lose more than you deposit.</p>
+</div>
+
+<script>
+const I18N = {
+  en: {
+    eyebrow: "Forex bot · MetaTrader 5", title1: "Trading", title2: "Desk", tabLive: "Live", tabBacktest: "Backtest",
+    balance: "Balance", equity: "Equity", todayPnl: "Today's P&L", openPos: "Open positions", equityCurve: "Equity curve",
+    pause: "Pause new trades", resume: "Resume trading", activity: "Activity", openPositions: "Open positions",
+    tradeHistory: "Trade history", noPositions: "No open positions.", noTrades: "No trades yet.",
+    noEquity: "No equity data yet — it is recorded once a minute while the bot runs.",
+    notRunning: "The bot hasn't run yet. Start it with <code>python main.py live</code>",
+    noBacktest: "No backtest yet. Run <code>python main.py backtest</code> and refresh.",
+    online: "Running", offline: "Stopped", paused: "Paused", dryRun: "Dry run", demo: "Demo account", real: "REAL account",
+    halted: "Daily limit hit", floating: "floating", maxOpen: "max", risk: "risk/trade", dayLimit: "daily limit",
+    symbol: "Symbol", side: "Side", lots: "Lots", entry: "Entry", exit: "Exit", price: "Price", sl: "SL", tp: "TP",
+    pnl: "P&L", opened: "Opened", closed: "Closed", status: "Status", reason: "Reason", pips: "Pips",
+    netProfit: "Net profit", ret: "Return", winRate: "Win rate", pf: "Profit factor", maxDd: "Max drawdown",
+    tradesN: "Trades", bySymbol: "By symbol", exitReasons: "Exit reasons", skipped: "Skipped signals", trades: "Trades",
+    won: "won", lost: "lost", expectancy: "per trade", streak: "worst losing streak", none: "none", last: "last",
+    buy: "buy", sell: "sell", open: "open",
+    disclaimer: "Results from backtests and demo accounts do not guarantee future performance. Trading forex with leverage can lose more than you deposit.",
+  },
+  ro: {
+    eyebrow: "Bot forex · MetaTrader 5", title1: "Birou de", title2: "Tranzacționare", tabLive: "Live", tabBacktest: "Backtest",
+    balance: "Sold", equity: "Capital", todayPnl: "Profit azi", openPos: "Poziții deschise", equityCurve: "Evoluția capitalului",
+    pause: "Oprește tranzacțiile noi", resume: "Reia tranzacționarea", activity: "Activitate", openPositions: "Poziții deschise",
+    tradeHistory: "Istoric tranzacții", noPositions: "Nicio poziție deschisă.", noTrades: "Încă nu există tranzacții.",
+    noEquity: "Încă nu există date — capitalul se înregistrează o dată pe minut cât timp rulează botul.",
+    notRunning: "Botul nu a rulat încă. Pornește-l cu <code>python main.py live</code>",
+    noBacktest: "Niciun backtest încă. Rulează <code>python main.py backtest</code> și reîncarcă pagina.",
+    online: "Rulează", offline: "Oprit", paused: "În pauză", dryRun: "Simulare", demo: "Cont demo", real: "Cont REAL",
+    halted: "Limita zilnică atinsă", floating: "flotant", maxOpen: "max", risk: "risc/tranzacție", dayLimit: "limită zilnică",
+    symbol: "Simbol", side: "Direcție", lots: "Loturi", entry: "Intrare", exit: "Ieșire", price: "Preț", sl: "SL", tp: "TP",
+    pnl: "Profit", opened: "Deschis", closed: "Închis", status: "Stare", reason: "Motiv", pips: "Pips",
+    netProfit: "Profit net", ret: "Randament", winRate: "Rată câștig", pf: "Factor profit", maxDd: "Scădere maximă",
+    tradesN: "Tranzacții", bySymbol: "Pe simbol", exitReasons: "Motive de ieșire", skipped: "Semnale ignorate", trades: "Tranzacții",
+    won: "câștigate", lost: "pierdute", expectancy: "pe tranzacție", streak: "cele mai multe pierderi la rând", none: "niciunul", last: "ultimele",
+    buy: "cumpărare", sell: "vânzare", open: "deschisă",
+    disclaimer: "Rezultatele din backtest și din conturile demo nu garantează performanța viitoare. Tranzacționarea forex cu efect de levier poate pierde mai mult decât ai depus.",
+  },
+};
+let lang = "en";
+try { lang = localStorage.getItem("fxbot-lang") || "en"; } catch (e) {}
+let tab = "live";
+const t = k => (I18N[lang] && I18N[lang][k]) || I18N.en[k] || k;
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const locale = () => (lang === "ro" ? "ro-RO" : "en-US");
+const money = (v, d = 2) => v == null || isNaN(v) ? "—" : Number(v).toLocaleString(locale(), { minimumFractionDigits: d, maximumFractionDigits: d });
+const signed = v => v == null ? "—" : (v > 0 ? "+" : "") + money(v);
+const cls = v => v > 0 ? "up" : v < 0 ? "down" : "muted";
+const fmtTime = s => { if (!s) return "—"; const d = new Date(s); return isNaN(d) ? esc(s) : d.toLocaleString(locale(), { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }); };
+const fmtUtc = s => fmtTime(s && !/[zZ]|[+-]\d\d:?\d\d$/.test(s) ? s + "Z" : s);   // MT5 position/trade times: naive UTC
+const px = v => v == null ? "—" : Number(v).toFixed(v >= 20 ? 3 : 5);
+
+function applyI18n() {
+  document.documentElement.lang = lang;
+  document.querySelectorAll("[data-i18n]").forEach(el => el.textContent = t(el.dataset.i18n));
+  document.querySelectorAll("[data-i18n-html]").forEach(el => el.innerHTML = t(el.dataset.i18nHtml));
+  document.querySelectorAll("#lang button").forEach(b => b.classList.toggle("on", b.dataset.lang === lang));
+}
+
+// ── charts ────────────────────────────────────────────────
+const charts = {};
+function drawEquity(id, points) {
+  const ctx = $(id).getContext("2d");
+  const grad = ctx.createLinearGradient(0, 0, 0, 280);
+  grad.addColorStop(0, "rgba(201,169,110,.28)"); grad.addColorStop(1, "rgba(201,169,110,0)");
+  const labels = points.map(p => fmtTime(p[0])), data = points.map(p => p[1]);
+  if (charts[id]) { const c = charts[id]; c.data.labels = labels; c.data.datasets[0].data = data; c.update("none"); return; }
+  charts[id] = new Chart(ctx, {
+    type: "line",
+    data: { labels, datasets: [{ data, borderColor: "#C9A96E", backgroundColor: grad, fill: true, borderWidth: 1.5, pointRadius: 0, tension: .15 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false, animation: false, interaction: { mode: "index", intersect: false },
+      plugins: { legend: { display: false }, tooltip: { backgroundColor: "#1c1c1c", borderColor: "rgba(241,239,233,.12)", borderWidth: 1, titleColor: "#F1EFE9", bodyColor: "#C9A96E", callbacks: { label: c => " " + money(c.parsed.y) } } },
+      scales: {
+        x: { ticks: { color: "rgba(241,239,233,.32)", maxTicksLimit: 6, maxRotation: 0 }, grid: { display: false }, border: { color: "rgba(241,239,233,.09)" } },
+        y: { ticks: { color: "rgba(241,239,233,.32)", callback: v => money(v, 0) }, grid: { color: "rgba(241,239,233,.06)" }, border: { display: false } },
+      },
+    },
+  });
+}
+
+// ── live tab ──────────────────────────────────────────────
+let liveData = null;
+function renderLive(d) {
+  liveData = d;
+  const s = d.status || {}, a = s.account || {}, positions = s.positions || [];
+  const paused = !!(d.control && d.control.paused);
+  $("statusDot").className = "dot " + (d.online ? (paused || s.halted ? "warn" : "on") : "");
+  $("statusText").textContent = d.online ? (paused ? t("paused") : s.halted ? t("halted") : t("online")) : t("offline");
+
+  const r = d.config.risk || {};
+  const chips = [];
+  if (a.login) chips.push(`<span class="chip ${a.demo ? "" : "warn"}">${a.demo ? t("demo") : t("real")} · ${esc(a.login)} · ${esc(a.server)}</span>`);
+  if ((s.dry_run ?? d.config.dry_run)) chips.push(`<span class="chip gold">${t("dryRun")}</span>`);
+  chips.push(`<span class="chip">${esc(s.strategy || d.config.strategy)}</span>`);
+  chips.push(`<span class="chip">${esc((s.symbols || d.config.symbols || []).join(" · "))} · ${esc(s.timeframe || d.config.timeframe)}</span>`);
+  chips.push(`<span class="chip">${t("risk")} ${r.risk_per_trade_pct ?? "—"}% · ${t("dayLimit")} ${r.daily_loss_limit_pct ?? "—"}% · ${t("maxOpen")} ${r.max_open_trades ?? "—"}</span>`);
+  $("liveChips").innerHTML = chips.join("");
+
+  $("kBalance").innerHTML = a.balance != null ? `<b>${money(a.balance)}</b>` : "—";
+  $("kCurrency").textContent = a.currency || "";
+  $("kEquity").textContent = a.equity != null ? money(a.equity) : "—";
+  const floating = a.equity != null ? a.equity - a.balance : null;
+  $("kFloating").innerHTML = floating != null ? `<span class="${cls(floating)}">${signed(floating)}</span> ${t("floating")}` : "";
+  $("kDay").innerHTML = s.day_pnl != null && a.equity != null ? `<span class="${cls(s.day_pnl)}">${signed(s.day_pnl)}</span>` : "—";
+  $("kDaySub").textContent = s.halted ? t("halted") : "";
+  $("kOpen").textContent = a.login ? positions.length : "—";
+  $("kOpenSub").textContent = `${t("maxOpen")} ${r.max_open_trades ?? "—"}`;
+
+  $("pauseBtn").className = "pill" + (paused ? " gold" : "");
+  $("pauseBtn").firstElementChild.textContent = paused ? t("resume") : t("pause");
+
+  const eq = (d.equity || []).map(e => [e.time, e.equity]);
+  $("liveChartEmpty").classList.toggle("hidden", eq.length > 1);
+  $("liveChart").parentElement.classList.toggle("hidden", eq.length <= 1);
+  if (eq.length > 1) drawEquity("liveChart", eq);
+
+  const ev = d.events || [];
+  $("eventsEmpty").classList.toggle("hidden", ev.length > 0);
+  $("events").innerHTML = ev.map(e => `<li><time>${fmtTime(e.time)}</time><span class="${esc(e.level)}">${esc(e.message)}</span></li>`).join("");
+
+  $("posEmpty").classList.toggle("hidden", positions.length > 0);
+  $("posTable").innerHTML = positions.length ? `<thead><tr><th>${t("symbol")}</th><th>${t("side")}</th><th class="num">${t("lots")}</th><th class="num">${t("entry")}</th><th class="num">${t("price")}</th><th class="num">${t("sl")}</th><th class="num">${t("tp")}</th><th class="num">${t("pnl")}</th><th>${t("opened")}</th></tr></thead><tbody>` +
+    positions.map(p => `<tr><td>${esc(p.symbol)}</td><td class="side ${p.side === "buy" ? "up" : "down"}">${t(p.side)}</td><td class="num">${p.lots}</td><td class="num">${px(p.entry_price)}</td><td class="num">${px(p.price)}</td><td class="num">${px(p.sl)}</td><td class="num">${px(p.tp)}</td><td class="num ${cls(p.profit)}">${signed(p.profit)}</td><td class="muted">${fmtUtc(p.open_time)}</td></tr>`).join("") + "</tbody>" : "";
+
+  const tr = d.trades || [];
+  $("tradeEmpty").classList.toggle("hidden", tr.length > 0);
+  $("tradeTable").innerHTML = tr.length ? `<thead><tr><th>${t("opened")}</th><th>${t("symbol")}</th><th>${t("side")}</th><th class="num">${t("lots")}</th><th class="num">${t("entry")}</th><th class="num">${t("exit")}</th><th class="num">${t("pnl")}</th><th>${t("status")}</th></tr></thead><tbody>` +
+    tr.map(x => `<tr><td class="muted">${fmtUtc(x.entry_time)}</td><td>${esc(x.symbol)}</td><td class="side ${x.side === "buy" ? "up" : "down"}">${t(x.side)}</td><td class="num">${x.lots}</td><td class="num">${px(x.entry_price)}</td><td class="num">${px(x.exit_price)}</td><td class="num ${cls(x.pnl)}">${x.pnl == null ? "—" : signed(x.pnl)}</td><td>${x.status === "open" ? `<span class="chip gold">${t("open")}</span>` : `<span class="muted">${t("closed")}</span>`}</td></tr>`).join("") + "</tbody>" : "";
+}
+
+// ── backtest tab ──────────────────────────────────────────
+let btData;
+function renderBacktest(r) {
+  btData = r;
+  $("btEmpty").classList.toggle("hidden", !!r);
+  $("btBody").classList.toggle("hidden", !r);
+  if (!r) return;
+  const m = r.metrics;
+  $("btChips").innerHTML = [
+    `<span class="chip gold">${esc(r.strategy)}</span>`,
+    `<span class="chip">${esc(r.symbols.join(" · "))} · ${esc(r.timeframe)}</span>`,
+    `<span class="chip">${t("risk")} ${r.risk.risk_per_trade_pct}% · ${t("dayLimit")} ${r.risk.daily_loss_limit_pct}%</span>`,
+    `<span class="chip">${fmtTime(r.generated)}</span>`,
+  ].join("");
+  const k = (label, value, sub = "") => `<div class="card kpi"><div class="label">${label}</div><div class="value">${value}</div><div class="sub">${sub}</div></div>`;
+  $("btKpis").innerHTML = [
+    k(t("netProfit"), `<b class="${cls(m.net_profit)}">${signed(m.net_profit)}</b>`, `${money(m.initial_balance, 0)} → ${money(m.final_balance, 0)}`),
+    k(t("ret"), `<span class="${cls(m.return_pct)}">${m.return_pct > 0 ? "+" : ""}${money(m.return_pct)}%</span>`),
+    k(t("winRate"), `${money(m.win_rate, 1)}%`, `${m.wins} ${t("won")} · ${m.losses} ${t("lost")}`),
+    k(t("pf"), m.profit_factor == null ? "—" : money(m.profit_factor), `${signed(m.expectancy)} ${t("expectancy")}`),
+    k(t("maxDd"), `<span class="down">${money(m.max_drawdown_pct)}%</span>`, `${money(m.max_drawdown)} · ${m.max_losing_streak} ${t("streak")}`),
+    k(t("tradesN"), `<b>${m.trades}</b>`, `${m.avg_pips} pips avg`),
+  ].join("");
+  $("btPeriod").textContent = `${fmtTime(r.period[0])} → ${fmtTime(r.period[1])}`;
+  drawEquity("btChart", r.equity);
+  const bs = Object.entries(m.by_symbol || {});
+  $("btSymTable").innerHTML = `<thead><tr><th>${t("symbol")}</th><th class="num">${t("tradesN")}</th><th class="num">${t("winRate")}</th><th class="num">${t("pf")}</th><th class="num">${t("netProfit")}</th></tr></thead><tbody>` +
+    bs.map(([s, x]) => `<tr><td>${esc(s)}</td><td class="num">${x.trades}</td><td class="num">${money(x.win_rate, 1)}%</td><td class="num">${x.profit_factor == null ? "—" : money(x.profit_factor)}</td><td class="num ${cls(x.net_profit)}">${signed(x.net_profit)}</td></tr>`).join("") + "</tbody>";
+  const chipList = (obj) => Object.entries(obj || {}).map(([k, v]) => `<span class="chip">${esc(k)} · ${v}</span>`).join("") || `<span class="muted">${t("none")}</span>`;
+  $("btReasons").innerHTML = chipList(m.exit_reasons);
+  $("btSkipped").innerHTML = chipList(r.skipped_signals);
+  const trades = r.trades.slice().reverse();
+  $("btTradeCount").textContent = `${t("last")} ${trades.length} / ${m.trades}`;
+  $("btTradeTable").innerHTML = `<thead><tr><th>${t("opened")}</th><th>${t("symbol")}</th><th>${t("side")}</th><th class="num">${t("lots")}</th><th class="num">${t("entry")}</th><th class="num">${t("exit")}</th><th class="num">${t("pips")}</th><th class="num">${t("pnl")}</th><th>${t("reason")}</th></tr></thead><tbody>` +
+    trades.map(x => `<tr><td class="muted">${fmtTime(x.entry_time)}</td><td>${esc(x.symbol)}</td><td class="side ${x.side === "buy" ? "up" : "down"}">${t(x.side)}</td><td class="num">${x.lots}</td><td class="num">${px(x.entry_price)}</td><td class="num">${px(x.exit_price)}</td><td class="num ${cls(x.pips)}">${money(x.pips, 1)}</td><td class="num ${cls(x.pnl)}">${signed(x.pnl)}</td><td class="muted">${esc(x.reason)}</td></tr>`).join("") + "</tbody>";
+}
+
+// ── data + events ─────────────────────────────────────────
+async function loadLive() { try { renderLive(await (await fetch("/api/live")).json()); } catch (e) { $("statusText").textContent = t("offline"); } }
+async function loadBacktest() { try { renderBacktest(await (await fetch("/api/backtest")).json()); } catch (e) {} }
+
+function setTab(name) {
+  tab = name;
+  document.querySelectorAll("#tabs button").forEach(b => b.classList.toggle("on", b.dataset.tab === name));
+  $("tab-live").classList.toggle("hidden", name !== "live");
+  $("tab-backtest").classList.toggle("hidden", name !== "backtest");
+  if (name === "backtest") loadBacktest();
+}
+$("tabs").addEventListener("click", e => { const b = e.target.closest("button"); if (b) setTab(b.dataset.tab); });
+$("lang").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  lang = b.dataset.lang; try { localStorage.setItem("fxbot-lang", lang); } catch (err) {}
+  applyI18n(); Object.values(charts).forEach(c => c.destroy()); for (const k in charts) delete charts[k];
+  if (liveData) renderLive(liveData); renderBacktest(btData);
+});
+$("pauseBtn").addEventListener("click", async () => {
+  const paused = !(liveData && liveData.control && liveData.control.paused);
+  await fetch("/api/control", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ paused }) });
+  loadLive();
+});
+
+applyI18n();
+loadLive(); loadBacktest();
+setInterval(() => { if (tab === "live") loadLive(); }, 5000);
+</script>
+</body>
+</html>
