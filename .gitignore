@@ -1,0 +1,20 @@
+.venv/
+__pycache__/
+.env
+data/*.csv
+data/*.db*
+reports/*.json
+reports/*.csv
+logs/*.log
+# platform secrets & runtime files
+data/.secret_key
+data/setup_token.txt
+connector/connector.ini
+connector/*.json
+connector/*.log
+connector/.venv/
+# Forex Bot app
+data/app.json
+data/backups/
+logs/*.log.*
+*.lnk
