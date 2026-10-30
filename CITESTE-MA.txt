@@ -1,0 +1,71 @@
+FOREX BOT - ghid rapid
+======================
+
+Tot proiectul e în acest folder: platforma (server, aplicația web, motorul de semnale, burst la știri,
+self-learning), conectorul MetaTrader 5, datele (data\), jurnalele (logs\), documentația (docs\) și testele.
+
+
+PORNIRE
+-------
+Dublu-click pe "Forex Bot" (pe Desktop, în meniul Start sau în acest folder).
+Se deschide fereastra Forex Bot, care:
+  - pornește serverul (http://127.0.0.1:8000) și, după el, conectorul MT5;
+  - îi repornește singură dacă se opresc;
+  - deschide aplicația web în fereastra ei (butonul "Deschide aplicația");
+  - îți arată starea: server, conector, MetaTrader 5 / Algo Trading, sold, ultima activitate.
+
+Dacă scurtătura lipsește: dublu-click pe "Forex Bot.bat" din acest folder (prima dată instalează tot ce trebuie).
+
+
+CE TREBUIE SĂ RĂMÂNĂ PORNIT
+---------------------------
+  - fereastra Forex Bot (poate fi minimizată)
+  - MetaTrader 5, cu butonul "Algo Trading" verde
+  - PC-ul (aplicația îl ține treaz cât rulează botul - bifa din fereastră)
+
+
+OPRIRE
+------
+  - Butonul "Oprește tot" din fereastră (fereastra rămâne deschisă; "Pornește tot" repornește), sau
+  - X pe fereastră -> "Oprește botul și închide".
+  - Doar fără tranzacții automate: în aplicația web, Setări -> Execuție -> "Doar notificări".
+La oprire, conectorul încheie întâi burst-ul la știri în curs (anulează ordinele, închide pozițiile;
+ce nu reușește din prima mai încearcă, până la 40 de secunde, apoi îți spune ce a rămas). Un burst
+doar programat (știrea n-a venit încă) nu se pierde: îl reia conectorul la pornirea următoare.
+Pozițiile semnalelor obișnuite rămân deschise, protejate la broker de Stop Loss / Take Profit.
+Dacă aplicația a fost închisă forțat (Task Manager, pană de curent), la pornirea următoare conectorul
+curăță ce a rămas de la burst.
+
+
+FIȘIERE IMPORTANTE (nu le da nimănui)
+-------------------------------------
+  .env                       setările serverului și cheile (API, Telegram)
+  connector\connector.ini    token-ul conectorului
+  data\platform.db           baza de date (utilizatori, semnale, tranzacții, burst-uri)
+  data\backups\              copii de siguranță ale bazei de date
+
+Jurnale: logs\app.log (aplicația), logs\server.log, connector\connector.log - butonul "Jurnale" le deschide.
+
+
+CALENDAR ECONOMIC: FOREXFACTORY SAU INVESTING.COM
+-------------------------------------------------
+Implicit, calendarul vine din fluxul săptămânal ForexFactory: gratuit, dar fără valorile publicate ("actual").
+Ca botul să ia calendarul de pe Investing.com, cu valorile publicate:
+  1. Cont pe apify.com, apoi console.apify.com/settings/integrations -> copiezi token-ul API.
+  2. În .env adaugi:
+       CALENDAR_SOURCE=investing
+       APIFY_TOKEN=token-ul tău
+  3. Repornești botul: "Oprește tot", apoi "Pornește tot".
+Merge dacă în logs\server.log apare "calendar: Investing.com week run, N releases" și pe pagina
+"Piață și știri" nota de sus spune "Calendar: Investing.com (prin Apify)".
+Cost: Apify taxează fiecare rând primit (de la 5,50 $ / 1.000), așa că botul cere doar știrile High și Medium:
+săptămâna o dată la 12 ore, știrile High de azi o dată pe oră și imediat după ce se publică una
+(estimat 1,5-4 $ pe zi de tranzacționare). Dacă Investing.com nu răspunde, botul trece singur pe ForexFactory.
+Atenție: termenii Investing.com interzic folosirea datelor fără acordul lor scris; pornirea e decizia ta.
+Înapoi la ForexFactory: scoți cele două rânduri din .env și repornești.
+
+
+REINSTALARE PE ALT PC
+---------------------
+Copiază tot folderul, instalează Python 3.12 (python.org) și MetaTrader 5, apoi dublu-click pe "Forex Bot.bat".
+(Folderul .venv nu se poate muta: dacă lipsește sau e stricat, șterge-l și pornește "Forex Bot.bat".)

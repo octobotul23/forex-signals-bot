@@ -1,0 +1,49 @@
+# ─────────────────────────────────────────────────────────────
+#  Forex bot configuration
+# ─────────────────────────────────────────────────────────────
+
+symbols: [EURUSD, GBPUSD, USDJPY]
+timeframe: H1            # M1 M5 M15 M30 H1 H4 D1
+
+# Strategy file in strategies/ (without .py) and its parameters.
+strategy: example_ema_cross
+strategy_params:
+  fast: 20
+  slow: 50
+  atr_period: 14
+  sl_atr: 2.0
+  tp_atr: 3.0
+
+risk:
+  risk_per_trade_pct: 1.0      # % of balance lost if the stop-loss is hit
+  max_open_trades: 3           # across all symbols (max 1 per symbol)
+  daily_loss_limit_pct: 3.0    # stop opening trades for the day after -3% (0 = off). Day resets 00:00 UTC
+  max_spread_pips: 3.0         # skip entries when spread is wider (0 = off)
+
+backtest:
+  source: csv                  # csv = files in data/ (create with `python main.py fetch`), mt5 = download directly
+  start: 2023-01-01
+  end: 2025-12-31
+  initial_balance: 10000
+  default_spread_pips: 1.0     # used when the data has no spread column
+  commission_per_lot: 7.0      # round-turn, in account currency
+
+# Pip size and pip value per 1.0 lot (account currency) — used by the backtest
+# when MT5 is not connected. With MT5 connected the real values are read from the broker.
+symbol_specs:
+  default: { pip: 0.0001, pip_value_per_lot: 10.0 }
+  USDJPY:  { pip: 0.01,   pip_value_per_lot: 6.7 }
+  EURJPY:  { pip: 0.01,   pip_value_per_lot: 6.7 }
+  GBPJPY:  { pip: 0.01,   pip_value_per_lot: 6.7 }
+  XAUUSD:  { pip: 0.1,    pip_value_per_lot: 10.0 }   # 100 oz contract: a 0.1 move on 1 lot is $10
+
+live:
+  dry_run: true                # true = only log/notify signals, never send orders
+  allow_real_account: false    # safety lock: refuse to run on a real-money account
+  poll_seconds: 10
+  magic: 20261020              # tags this bot's orders so it never touches your manual trades
+  deviation_points: 20         # max slippage accepted on market orders
+
+dashboard:
+  host: 127.0.0.1              # keep on localhost — the dashboard has no login
+  port: 8050
