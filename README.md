@@ -1,5 +1,7 @@
 # FX Signals: forex bot + subscription platform
 
+> 📄 **Case study / Studiu de caz:** [CASE_STUDY.md](CASE_STUDY.md) · [iluz.ro](https://iluz.ro/video/proiect/h-mw9gb34f?lang=en)
+
 Two things live in this folder:
 
 1. **Personal bot (v1)**: backtest and run a strategy on your own MetaTrader 5 account (`main.py fetch | backtest | live | dashboard`).
